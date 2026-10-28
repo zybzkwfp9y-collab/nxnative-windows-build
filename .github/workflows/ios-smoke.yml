@@ -1,0 +1,111 @@
+name: iOS synthetic build
+run-name: nxnative-${{ inputs.request_id }}
+on:
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: Correlation ID from Windows launcher
+        required: true
+        type: string
+      upload_artifacts:
+        description: Enable only after confirming free artifact storage or a zero spending budget
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: read
+concurrency:
+  group: nxnative-ios-smoke
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.event.repository.private == false
+    runs-on: xcode-27
+    timeout-minutes: 40
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
+      GAME: 0100F2C0115B6000
+      PYTHONUTF8: '1'
+      HOMEBREW_NO_AUTO_UPDATE: '1'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # upstream pin v7.0.1
+        with:
+          persist-credentials: false
+      - name: Fetch exact authentic source
+        run: |
+          set -euo pipefail
+          mkdir -p logs artifacts source
+          python3 - <<'PY'
+          import json, subprocess
+          c = json.load(open('config/upstream.json'))
+          subprocess.run(['git','init','source/nxnative'], check=True)
+          for args in [['remote','add','origin',c['repository']], ['fetch','--depth','1','origin',c['revision']], ['checkout','--detach','FETCH_HEAD']]:
+              subprocess.run(['git','-C','source/nxnative',*args], check=True)
+          actual = subprocess.check_output(['git','-C','source/nxnative','rev-parse','HEAD'], text=True).strip()
+          assert actual == c['revision'], 'pin mismatch'
+          from pathlib import Path
+          if Path('source/nxnative/.gitmodules').exists():
+              subprocess.run(['git','-C','source/nxnative','submodule','update','--init','--recursive'],check=True)
+          PY
+      - name: Detect and enforce supported Apple toolchain
+        run: |
+          set -euo pipefail
+          { uname -a; xcodebuild -version; xcodebuild -showsdks; xcrun --sdk iphoneos --show-sdk-version; xcrun clang --version; xcrun metal --version; python3 --version; } 2>&1 | tee logs/toolchain.log
+          test "$(uname -m)" = arm64
+          xcodebuild -version | grep -Fx 'Xcode 27.1'
+          cd source/nxnative
+          python3 dm/gfx/tools/own_compilers.py --check-metal 2>&1 | tee ../../logs/metal-lock.log
+      - name: Install XcodeGen and isolated Python dependencies
+        run: |
+          set -euo pipefail
+          command -v xcodegen || brew install xcodegen
+          python3 -m venv "$RUNNER_TEMP/nx-venv"
+          "$RUNNER_TEMP/nx-venv/bin/python" -m pip install -r config/requirements-windows.lock.txt 2>&1 | tee logs/dependencies.log
+          echo "$RUNNER_TEMP/nx-venv/bin" >> "$GITHUB_PATH"
+          { xcodegen --version; brew list --versions; "$RUNNER_TEMP/nx-venv/bin/python" -m pip freeze; } > logs/dependency-versions.log
+      - name: Selected upstream Python tests and portable CPU texture tests
+        run: |
+          set -euo pipefail
+          python3 scripts/run-portable-tests.py --source source/nxnative --logs logs/python
+          make -C source/nxnative/dm/gfx/tex/tests t_tex 2>&1 | tee logs/texture-build.log
+          source/nxnative/dm/gfx/tex/tests/t_tex 2>&1 | tee logs/texture-run.log
+      - name: Compile and link the real production app with synthetic inputs
+        run: |
+          set -euo pipefail
+          cd source/nxnative
+          python3 dm/ios/tools/build_smoke.py --output "$RUNNER_TEMP/nx-ios-smoke" 2>&1 | tee ../../logs/ios-build.log
+      - name: Inspect and package explicitly labelled synthetic fixture
+        run: |
+          set -euo pipefail
+          python3 scripts/package-smoke.py "$RUNNER_TEMP/nx-ios-smoke/derived/Build/Products/Release-iphoneos/DmIOS.app" artifacts
+          python3 scripts/validate-artifact.py artifacts
+      - name: Bound combined artifact storage
+        id: bound
+        if: always() && inputs.upload_artifacts
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          size = sum(p.stat().st_size for root in ('artifacts','logs') for p in Path(root).rglob('*') if p.is_file())
+          assert size < 45 * 1024**2, f'Refusing artifact upload: {size} bytes exceeds 45 MiB cap'
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out: out.write('allowed=true\n')
+          PY
+      - name: Upload bounded diagnostics and synthetic fixture
+        if: always() && inputs.upload_artifacts && steps.bound.outputs.allowed == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # upstream pin v7.0.2
+        with:
+          name: nxnative-synthetic-${{ github.run_id }}
+          path: |
+            artifacts/
+            logs/
+          retention-days: 1
+          if-no-files-found: error
+          compression-level: 6
+      - name: State the validation boundary
+        if: always()
+        run: |
+          echo 'Synthetic compile/link fixture only. No game, keys, signing, installation or gameplay test.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'GPU/Metal execution tests are unavailable on this hosted runner.' >> "$GITHUB_STEP_SUMMARY"
