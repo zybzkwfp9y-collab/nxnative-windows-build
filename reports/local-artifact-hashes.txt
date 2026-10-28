@@ -1,7 +1,2 @@
-
-Algorithm Hash                                                             Path
---------- ----                                                             ----
-SHA256    E481FE55E0570AC7DC07941FAEFBA4A6E3900BF53E55B1C7F074BE16A49FCC27 C:\Users\kayy_\Documents\Codex\2026-10-28\fi…
-SHA256    92B96917B50624E4648B77B1AFD48059B2F855F42936824B043C64D051DCDC45 C:\Users\kayy_\Documents\Codex\2026-10-28\fi…
-
-
+t_tex.exe e481fe55e0570ac7dc07941faefba4a6e3900bf53e55b1c7f074be16a49fcc27
+nvn_deswizzle-arm64.obj 92b96917b50624e4648b77b1afd48059b2f855f42936824b043c64d051dcdc45
