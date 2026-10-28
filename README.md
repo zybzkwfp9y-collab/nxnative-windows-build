@@ -1,8 +1,10 @@
 # nxnative from Windows — fresh investigation and build harness
 
-**Current result:** authentic source retrieved; portable Windows C tests passed;
-Windows ARM64 object generated; the real full application still requires Apple's
-SDK/frameworks. No iPhone application, IPA, installation or game launch is claimed.
+**Current result:** the [first cloud build passed](https://github.com/zybzkwfp9y-collab/nxnative-windows-build/actions/runs/40690973131).
+It compiled/linked the production app and validated an unsigned ARM64 iOS
+**synthetic fixture IPA** using Xcode 27.1 and iPhoneOS SDK 27.1. Artifact uploads
+were disabled; only logs were downloaded. Portable Windows C/C# builds also passed.
+No playable per-game IPA, installation or game launch is claimed.
 See `reports/final-verification.md` for the actual stage-by-stage results.
 
 This project was created from scratch on 28 October 2026. It does not use the
@@ -58,6 +60,19 @@ The selected upstream suite includes a POSIX C identity test that fails on Windo
 because `pread` is not provided by this CRT; a Swift test skips without Apple's
 Swift toolchain. Those are reported, not hidden. Full upstream Apple/GPU regression
 testing has not occurred. See the matrix and full logs for scope and failures.
+
+Reproduce C/ARM64/Apple-SDK probes (and optionally C# builds) with:
+
+```powershell
+./scripts/test-windows.ps1 -Python ./.venv/Scripts/python.exe -LlvmBin 'C:/path/to/llvm/bin' -DotNet 'C:/path/to/dotnet.exe'
+```
+
+The full-host/iOS-SDK negative probes record their real failures. The C# translator
+source fingerprint initially differed because Windows converted LF to CRLF. The
+fetcher now disables that conversion before checkout. Restoring the two embedded
+files from exact Git blob bytes and rebuilding produced the locked source digest
+`f21af1efa737a270`; this does not certify the compiled translator DLLs' byte-level
+fingerprints or any Metal shader outputs.
 
 ## Repository approval and account authentication
 

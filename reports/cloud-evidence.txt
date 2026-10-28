@@ -1,0 +1,16 @@
+build	Detect and enforce supported Apple toolchain	2026-10-28T12:49:32.3354610Z Xcode 27.1
+build	Detect and enforce supported Apple toolchain	2026-10-28T12:49:39.3818170Z Apple metal version 32023.921 (metalfe-32023.921.6)
+build	Detect and enforce supported Apple toolchain	2026-10-28T12:49:40.2883760Z Xcode 27.1
+build	Selected upstream Python tests and portable CPU texture tests	2026-10-28T12:50:01.3090060Z PASS: dm/tools/tests/test_nro_header.py
+build	Selected upstream Python tests and portable CPU texture tests	2026-10-28T12:50:01.5441110Z PASS: dm/tools/tests/test_nso_match.py
+build	Selected upstream Python tests and portable CPU texture tests	2026-10-28T12:50:01.6393590Z PASS: dm/tools/tests/test_nsp_env_checks.py
+build	Selected upstream Python tests and portable CPU texture tests	2026-10-28T12:50:01.6923230Z PASS: dm/tools/tests/test_ci_toolchain.py
+build	Selected upstream Python tests and portable CPU texture tests	2026-10-28T12:50:01.7812180Z PASS: dm/tools/tests/test_settings.py
+build	Selected upstream Python tests and portable CPU texture tests	2026-10-28T12:50:02.0333190Z PASS: dm/tools/tests/test_romfs_identity.py
+build	Selected upstream Python tests and portable CPU texture tests	2026-10-28T12:50:02.1327800Z PASS: dm/tools/tests/test_nsp_scan.py
+build	Selected upstream Python tests and portable CPU texture tests	2026-10-28T12:50:28.7449880Z PASS: dm/ios/tests/test_launcher_storage.py
+build	Selected upstream Python tests and portable CPU texture tests	2026-10-28T12:50:30.6424040Z all passed: 5334/5334 checks passed
+build	Compile and link the real production app with synthetic inputs	2026-10-28T12:51:01.6490760Z ** BUILD SUCCEEDED **
+build	Compile and link the real production app with synthetic inputs	2026-10-28T12:51:01.7175880Z iOS smoke build passed: /Users/runner/work/_temp/nx-ios-smoke/derived/Build/Products/Release-iphoneos/DmIOS.app/DmIOS
+build	Inspect and package explicitly labelled synthetic fixture	2026-10-28T12:51:04.4681010Z Validated and packaged unsigned synthetic ARM64 iOS fixture.
+build	Inspect and package explicitly labelled synthetic fixture	2026-10-28T12:51:04.5281850Z PASS: synthetic ARM64 iOS fixture integrity; NOT an installable or playable game.

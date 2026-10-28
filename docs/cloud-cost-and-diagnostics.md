@@ -30,6 +30,14 @@ from another experiment. No private files, device inputs or secrets are accepted
 Hosted VM Metal execution tests are omitted because upstream documents that its
 Metal 4 runtime is unavailable there. Compilation is still meaningful.
 
+The approved compute-only run 40690973131 passed. It built/linked and packaged the
+synthetic ARM64 iOS fixture on Xcode 27.1 / iPhoneOS SDK 27.1, with the expected
+Metal compiler 32023.921. Eight selected Python test files and all 5,334 texture
+checks passed on macOS. Its artifact API reports zero retained artifacts; the
+complete text log was downloaded. A read-only billing summary request required an
+additional OAuth user scope, which was not granted or requested. No account
+billing/security configuration was changed; artifact upload remains off.
+
 For a failure, download/read the complete logs, then identify the first actionable
 compiler/linker error rather than the final summary. Classify: missing dependency,
 compiler incompatibility, SDK mismatch, unsupported architecture, linker failure,
