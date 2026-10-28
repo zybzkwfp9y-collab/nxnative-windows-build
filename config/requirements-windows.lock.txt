@@ -1,0 +1,4 @@
+capstone==5.0.9
+fonttools==4.68.0
+lz4==4.4.5
+PyYAML==6.0.3

@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/seedds/nxnative.git",
+  "revision": "6c4a81d40d200bbfe65ad0027ab093405367ada6",
+  "profile": "0100F2C0115B6000",
+  "runner": "xcode-27",
+  "xcode": "27.1",
+  "artifact_kind": "synthetic-compile-link-fixture-not-a-game",
+  "checked_on": "2026-10-28"
+}
