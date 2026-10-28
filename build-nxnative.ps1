@@ -31,7 +31,7 @@ Get-Command $Python -ErrorAction Stop | Out-Null
 Invoke-Gh auth status | Out-Host
 $login = Invoke-Gh api user --jq .login
 if ($login -ne 'zybzkwfp9y-collab') { throw "Unexpected authenticated account: $login" }
-$repo = Invoke-Gh repo view $Repository --json nameWithOwner,isPrivate,defaultBranchRef,viewerPermission | ConvertFrom-Json
+$repo = Invoke-Gh repo view $Repository --json 'nameWithOwner,isPrivate,defaultBranchRef,viewerPermission' | ConvertFrom-Json
 if ($repo.nameWithOwner -ne $Repository -or $repo.isPrivate) { throw 'Only the approved public repository is allowed for the zero-cost standard runner route.' }
 if ($repo.viewerPermission -notin @('ADMIN','MAINTAIN','WRITE')) { throw 'Write access is required.' }
 $branch = $repo.defaultBranchRef.name
@@ -51,7 +51,7 @@ Invoke-Gh workflow run ios-smoke.yml --repo $Repository --ref $branch -f "reques
 $deadline = [DateTime]::UtcNow.AddMinutes($TimeoutMinutes)
 $run = $null
 while ([DateTime]::UtcNow -lt $deadline) {
-    $runs = Invoke-Gh run list --repo $Repository --workflow ios-smoke.yml --limit 30 --json databaseId,displayTitle,status,conclusion,url | ConvertFrom-Json
+    $runs = Invoke-Gh run list --repo $Repository --workflow ios-smoke.yml --limit 30 --json 'databaseId,displayTitle,status,conclusion,url' | ConvertFrom-Json
     $run = $runs | Where-Object displayTitle -eq "nxnative-$id" | Select-Object -First 1
     if ($run) {
         Write-Host "$($run.status): $($run.url)"
